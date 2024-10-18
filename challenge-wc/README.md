@@ -38,4 +38,6 @@ $ make test
 go test .
 ok      ccwc    1.006s
 ```
-abbiamo il nostro primo test verde!
+abbiamo il nostro primo test verde! 
+
+Aggiungo il test che verifica, in caso di file errato, che il metodo ritorni un errore.
