@@ -1,7 +1,7 @@
 all: clean test build
 
 build: 
-	go build -o ./target/
+	go build -o ./target/ccwc
 
 test:
 	go test .

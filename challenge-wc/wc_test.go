@@ -6,15 +6,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWc(t *testing.T) {
-	wc := NewWc()
+func TestWc_WhenInputFile_ShouldReturnTheExpectedNumberOfBytes(t *testing.T) {
+	// ARRANGE
+	wc := NewWc("./test.txt")
 
-	assert.NotNil(t, wc)
-}
+	// ACT
+	countBytes := wc.CountBytes()
 
-type Wc struct {
-}
-
-func NewWc() Wc {
-	return Wc{}
+	// ASSERT
+	assert.Equal(t, 342190, countBytes)
 }
