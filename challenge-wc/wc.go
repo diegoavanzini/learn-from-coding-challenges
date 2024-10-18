@@ -1,5 +1,7 @@
 package main
 
+import "os"
+
 func main() {
 
 }
@@ -8,8 +10,9 @@ type wc struct {
 	filepath string
 }
 
-func (w wc) CountBytes() int {
-	return 0
+func (w wc) CountBytes() (int, error) {
+	result, err := os.ReadFile(w.filepath)
+	return len(result), err
 }
 
 func NewWc(inputFile string) wc {

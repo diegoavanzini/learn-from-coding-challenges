@@ -11,7 +11,10 @@ func TestWc_WhenInputFile_ShouldReturnTheExpectedNumberOfBytes(t *testing.T) {
 	wc := NewWc("./test.txt")
 
 	// ACT
-	countBytes := wc.CountBytes()
+	countBytes, err := wc.CountBytes()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// ASSERT
 	assert.Equal(t, 342190, countBytes)

@@ -30,6 +30,12 @@ FAIL
 FAIL	ccwc	1.183s
 FAIL
 ```
+vedi commit
 
-
-un pó piú complicato é gestire i parametri in ingesso al nostro tool
+vado ad implementare il metodo `CountBytes()` in modo da far passare il test
+```
+$ make test
+go test .
+ok      ccwc    1.006s
+```
+abbiamo il nostro primo test verde!
