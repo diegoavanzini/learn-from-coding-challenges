@@ -6,5 +6,8 @@ build:
 test:
 	go test .
 
+format:
+	go fmt .
+
 clean:
 	rm -rf ./target/*

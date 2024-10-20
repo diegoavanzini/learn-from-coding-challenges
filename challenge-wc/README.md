@@ -41,3 +41,53 @@ ok      ccwc    1.006s
 abbiamo il nostro primo test verde! 
 
 Aggiungo il test che verifica, in caso di file errato, che il metodo ritorni un errore.
+
+Infine é necessario chiamare il nostro eseguibile da linea di comando e far arrivare al nostro metodo i parametri che gli servono per fare quello che deve.
+
+Per questo ci viene in aiuto il package `flag`.
+
+In Go la funzione `main` é il punto di accesso del nostro tool ed é lei che riceve i parametri in input al tool.
+
+Al fine di testare la validazione dei parametri in ingresso ho creato la funzione privata `validateInput` che riceve in ingresso i parametri passati e utilizzando il pacchetto `flag` definisce i parametri accettati e ne esegue il parsing e la validazione.
+
+Il primo test verifica che senza parametri in ingresso la validazione ritorni un errore:
+
+```golang
+func TestWc_validateInputWithoutArguments_ShouldReturnError(t *testing.T) {
+	// ARRANGE
+	args := []string{}
+
+	// ACT
+	_, _, err := validateInput(args)
+	defer resetFlags()
+
+	// ASSERT
+	assert.NotNil(t, err)
+	assert.Equal(t, "count what?", err.Error())
+}
+```
+
+In particolare con 
+
+```golang
+byteCount = flag.CommandLine.Bool("c", false, "count bytes in file usage: ccwc -c <file>")
+```
+dichiaro che uno dei parametri del mio tool sará un booleano che si chiamerá "c" ed di default sará `false`, mentre se presente sará `true`.
+
+con 
+```golang
+flag.CommandLine.Parse(args)
+```
+vado a fare il parsing degli argomenti.
+
+Gli argomenti in ingresso saranno quelli passati a line di comando `os.Args[1:]` togliendo il primo che é il nome del comando oppure quelli passati nel test.
+
+Da notare la chiamata in defer della funzione `resetFlags()`, questa é necessaria in quando la dichiarazione di `CommandLine` é statica, questo fa si che quando lancio il secondo test che va a ridefinire `c` questo vada in errore ma noi non lo vogliamo. Per evitarlo lanciamo questo 
+```golang
+func resetFlags() {
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError) //flags are now reset
+}
+```
+
+altri test che ho ritenuto utili sono quando il flag é presente ma non c´é il nome del file (`TestWc_validateInputWithCountFlagButNoFilepath_ShouldReturnError`) oppure c´é il nome del file ma é sbagliato (`TestWc_WhenInputFilePathIsWrong_ShouldReturnAnError`).
+
