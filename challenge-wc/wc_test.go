@@ -9,6 +9,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWc_validateInputWithCountLinesAndFilepath_ShouldReturnTrue(t *testing.T) {
+	// ARRANGE
+	args := []string{"-l", "filepath"}
+	// ACT
+	linesFlag, countFlag, filepath, err := validateInput(args)
+	defer resetFlags()
+
+	// ASSERT
+	assert.Nil(t, err)
+	assert.False(t, *countFlag)
+	assert.True(t, *linesFlag)
+	assert.Equal(t, filepath, "filepath")
+}
+
 func TestWc_WhenInputFileAndLFlag_ShouldReturnTheExpectedNumberOfLines(t *testing.T) {
 	// ARRANGE
 	expecteNumberoOfRows := 7145
@@ -18,7 +32,7 @@ func TestWc_WhenInputFileAndLFlag_ShouldReturnTheExpectedNumberOfLines(t *testin
 	}
 	defer resetFlags()
 	// ACT
-	numberOfRows := wc.CountRows()
+	numberOfRows := wc.numberOfLines
 
 	// ASSERT
 	assert.Equal(t, expecteNumberoOfRows, numberOfRows)
@@ -28,7 +42,7 @@ func TestWc_validateInputWithCountFlagAndFilepath_ShouldReturnTrue(t *testing.T)
 	// ARRANGE
 	args := []string{"-c", "filepath"}
 	// ACT
-	countFlag, filepath, err := validateInput(args)
+	_, countFlag, filepath, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
@@ -41,7 +55,7 @@ func TestWc_validateInputWithCountFlagButNoFilepath_ShouldReturnError(t *testing
 	args := []string{"-c"}
 
 	// ACT
-	_, _, err := validateInput(args)
+	_, _, _, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
@@ -53,7 +67,7 @@ func TestWc_validateInputWithoutArguments_ShouldReturnError(t *testing.T) {
 	args := []string{}
 
 	// ACT
-	_, _, err := validateInput(args)
+	_, _, _, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
@@ -82,7 +96,7 @@ func TestWc_WhenInputFile_ShouldReturnTheExpectedNumberOfBytes(t *testing.T) {
 	}
 
 	// ACT
-	countBytes := wc.CountBytes()
+	countBytes := wc.numberOfBytes
 
 	// ASSERT
 	assert.Equal(t, 342190, countBytes)

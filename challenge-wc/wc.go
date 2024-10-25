@@ -11,7 +11,7 @@ import (
 
 func main() {
 	args := os.Args[1:]
-	byteCountFlag, filepath, err := validateInput(args)
+	lineCountFlag, byteCountFlag, filepath, err := validateInput(args)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -22,8 +22,12 @@ func main() {
 		os.Exit(1)
 	}
 	if *byteCountFlag {
-		byteCount := wcTool.CountBytes()
-		fmt.Printf("%d %s", byteCount, filepath)
+		byteCount := wcTool.numberOfBytes
+		fmt.Printf("%d bytes %s\n", byteCount, filepath)
+	}
+	if *lineCountFlag {
+		lineCount := wcTool.numberOfLines
+		fmt.Printf("%d lines %s\n", lineCount, filepath)
 	}
 	os.Exit(0)
 }
@@ -45,17 +49,9 @@ func validateInput(args []string) (linesCount, byteCount *bool, filepath string,
 }
 
 type wc struct {
-	numberOfLine  int
+	numberOfLines int
 	numberOfBytes int
 	filepath      string
-}
-
-func (w *wc) CountRows() int {
-	return w.numberOfLine
-}
-
-func (w *wc) CountBytes() int {
-	return w.numberOfBytes
 }
 
 func (w *wc) readFile(inputFile string) error {
@@ -66,7 +62,7 @@ func (w *wc) readFile(inputFile string) error {
 	buf := make([]byte, 32*1024)
 	for {
 		c, err := r.Read(buf)
-		w.numberOfLine += bytes.Count(buf[:c], []byte{'\n'})
+		w.numberOfLines += bytes.Count(buf[:c], []byte{'\n'})
 		w.numberOfBytes += c
 		switch {
 		case err == io.EOF:

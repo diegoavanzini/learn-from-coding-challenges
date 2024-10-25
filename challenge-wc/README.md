@@ -124,3 +124,5 @@ func (w *wc) readFile(inputFile string) error {
 	}
 }
 ```
+ora é necessario introdurre il flag a linea di comando che dice di calcolare il numero di linee quindi altro test rosso che andiamo a mettere a posto.
+E se inserisco piú flag ritorno  il conteggio di linee e bytes.
