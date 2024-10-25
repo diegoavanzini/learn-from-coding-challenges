@@ -9,6 +9,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWc_WhenInputFileAndLFlag_ShouldReturnTheExpectedNumberOfLines(t *testing.T) {
+	// ARRANGE
+	expecteNumberoOfRows := 7145
+	wc, err := NewWc("./test.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resetFlags()
+	// ACT
+	numberOfRows := wc.CountRows()
+
+	// ASSERT
+	assert.Equal(t, expecteNumberoOfRows, numberOfRows)
+}
+
 func TestWc_validateInputWithCountFlagAndFilepath_ShouldReturnTrue(t *testing.T) {
 	// ARRANGE
 	args := []string{"-c", "filepath"}
@@ -49,26 +64,25 @@ func TestWc_validateInputWithoutArguments_ShouldReturnError(t *testing.T) {
 func TestWc_WhenInputFilePathIsWrong_ShouldReturnAnError(t *testing.T) {
 	// ARRANGE
 	wrongFilePath := "./ghost.txt"
-	wc := NewWc(wrongFilePath)
 
 	// ACT
-	countBytes, err := wc.CountBytes()
+	wc, err := NewWc(wrongFilePath)
 
 	// ASSERT
+	assert.Nil(t, wc)
 	assert.NotNil(t, err)
 	assert.Equal(t, fmt.Sprintf("open %s: The system cannot find the file specified.", wrongFilePath), err.Error())
-	assert.Equal(t, 0, countBytes)
 }
 
 func TestWc_WhenInputFile_ShouldReturnTheExpectedNumberOfBytes(t *testing.T) {
 	// ARRANGE
-	wc := NewWc("./test.txt")
-
-	// ACT
-	countBytes, err := wc.CountBytes()
+	wc, err := NewWc("./test.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// ACT
+	countBytes := wc.CountBytes()
 
 	// ASSERT
 	assert.Equal(t, 342190, countBytes)

@@ -91,3 +91,36 @@ func resetFlags() {
 
 altri test che ho ritenuto utili sono quando il flag é presente ma non c´é il nome del file (`TestWc_validateInputWithCountFlagButNoFilepath_ShouldReturnError`) oppure c´é il nome del file ma é sbagliato (`TestWc_WhenInputFilePathIsWrong_ShouldReturnAnError`).
 
+
+# step 2
+
+in questo step dobbiamo calcolare il numero di righe in un file, utilizzando il file test.txt ci si aspetta (expected) 7145 righe.
+
+Iniziamo come al solito dal test con il file di txt in dotazione e ritorno in prima battuta 0 facendo fallire il test.
+
+Il test si aspetta il metodo `CountRows` associato alla struc `wc`, questo ritornerá il numero di linee. Per farlo deve anch'esso andare a leggere il file in input e vien da se che é necessario in questo caso entrare nel merito del contenuto del file per individuare gli a capo `[]byte{'\n'}`.
+
+Sia che si tratti di leggere il numero di bytes o il numero di righe é necessaria la lettura del file. Per leggere il file si usa il descrittore ritornato da `os.Open(w.filepath)` e utilizzando il metodo `Read` andiamo a leggere e mettere il contenuto in un array di byte.
+
+Centralizzo il calcolo in un metodo che si occupa di leggere il file e instanaziare i contatori che ci interessano.
+
+```golang
+func (w *wc) readFile(inputFile string) error {
+	r, err := os.Open(w.filepath)
+	if err != nil {
+		return err
+	}
+	buf := make([]byte, 32*1024)
+	for {
+		c, err := r.Read(buf)
+		w.numberOfLine += bytes.Count(buf[:c], []byte{'\n'})
+		w.numberOfBytes += c
+		switch {
+		case err == io.EOF:
+			return nil
+		case err != nil:
+			return err
+		}
+	}
+}
+```

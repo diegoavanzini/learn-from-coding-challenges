@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -14,43 +16,74 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	wcTool := NewWc(filepath)
-	byteCount, err := wcTool.CountBytes()
+	wcTool, err := NewWc(filepath)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 	if *byteCountFlag {
+		byteCount := wcTool.CountBytes()
 		fmt.Printf("%d %s", byteCount, filepath)
 	}
 	os.Exit(0)
 }
 
-func validateInput(args []string) (byteCount *bool, filepath string, err error) {
+func validateInput(args []string) (linesCount, byteCount *bool, filepath string, err error) {
 	byteCount = flag.CommandLine.Bool("c", false, "count bytes in file usage: ccwc -c <file>")
+	linesCount = flag.CommandLine.Bool("l", false, "count lines in file usage: ccwc -l <file>")
+
 	flag.CommandLine.Parse(args)
 
-	if !*byteCount {
-		return nil, "", errors.New("count what?")
+	if !*byteCount && !*linesCount {
+		return nil, nil, "", errors.New("count what?")
 	}
 	if len(flag.Args()) == 0 || flag.Args()[0] == "" {
-		return nil, "", errors.New("count what? filename is mandatory")
+		return nil, nil, "", errors.New("count what? filename is mandatory")
 	}
 	filepath = flag.Args()[0]
-	return byteCount, filepath, nil
+	return linesCount, byteCount, filepath, nil
 }
 
 type wc struct {
-	filepath string
+	numberOfLine  int
+	numberOfBytes int
+	filepath      string
 }
 
-func (w wc) CountBytes() (int, error) {
-	result, err := os.ReadFile(w.filepath)
-	return len(result), err
+func (w *wc) CountRows() int {
+	return w.numberOfLine
 }
 
-func NewWc(inputFile string) wc {
-	return wc{
+func (w *wc) CountBytes() int {
+	return w.numberOfBytes
+}
+
+func (w *wc) readFile(inputFile string) error {
+	r, err := os.Open(w.filepath)
+	if err != nil {
+		return err
+	}
+	buf := make([]byte, 32*1024)
+	for {
+		c, err := r.Read(buf)
+		w.numberOfLine += bytes.Count(buf[:c], []byte{'\n'})
+		w.numberOfBytes += c
+		switch {
+		case err == io.EOF:
+			return nil
+		case err != nil:
+			return err
+		}
+	}
+}
+
+func NewWc(inputFile string) (*wc, error) {
+	w := &wc{
 		filepath: inputFile,
 	}
+	err := w.readFile(inputFile)
+	if err != nil {
+		return nil, err
+	}
+	return w, err
 }
