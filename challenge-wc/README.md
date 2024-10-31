@@ -136,4 +136,6 @@ Dopo vari tentativi ho trovato che invece di contare le parole sarebbe piú furb
 
 Il test `TestWc_WhenInputFileAndLFlagL_ShouldReturnTheExpectedNumberOfLines` diventa verde.
 
-Ora non ci resta che testare e implementare l'input con il flag `-w`
+Ora non ci resta che testare e implementare l'input con il flag `-w` ma a questo punto la funzione validateInput dovrebbe ritornare 3 flag e si rende necessario dare un significato a questo output raggruppando questi flag in una struttura.
+
+Creo la struttura `WordCountInput` che contiene i 3 flag in ingresso al nostro tool e il `filepath` questo richiede un pó di refactoring ma mi permette di non modificare tutti gli utilizzatori del validateFlag ogni volta che aggiungo un nuovo flag.

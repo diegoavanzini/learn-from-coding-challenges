@@ -12,41 +12,54 @@ import (
 
 func main() {
 	args := os.Args[1:]
-	lineCountFlag, byteCountFlag, filepath, err := validateInput(args)
+	wcinput, err := validateInput(args)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	wcTool, err := NewWc(filepath)
+	wcTool, err := NewWc(wcinput.Filepath)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	if *byteCountFlag {
+	if *wcinput.BytesCountFlag {
 		byteCount := wcTool.numberOfBytes
-		fmt.Printf("%d bytes %s\n", byteCount, filepath)
+		fmt.Printf("%d bytes %s\n", byteCount, wcinput.Filepath)
 	}
-	if *lineCountFlag {
+	if *wcinput.LinesCountFlag {
 		lineCount := wcTool.numberOfLines
-		fmt.Printf("%d lines %s\n", lineCount, filepath)
+		fmt.Printf("%d lines %s\n", lineCount, wcinput.Filepath)
+	}
+	if *wcinput.WordsCountFlag {
+		wordsCount := wcTool.numberOfWords
+		fmt.Printf("%d words %s\n", wordsCount, wcinput.Filepath)
 	}
 	os.Exit(0)
 }
 
-func validateInput(args []string) (linesCount, byteCount *bool, filepath string, err error) {
-	byteCount = flag.CommandLine.Bool("c", false, "count bytes in file usage: ccwc -c <file>")
-	linesCount = flag.CommandLine.Bool("l", false, "count lines in file usage: ccwc -l <file>")
+type WordCountInput struct {
+	WordsCountFlag *bool
+	LinesCountFlag *bool
+	BytesCountFlag *bool
+	Filepath       string
+}
 
+func validateInput(args []string) (wordCountInput WordCountInput, err error) {
+	wordCountInput = WordCountInput{
+		BytesCountFlag: flag.CommandLine.Bool("c", false, "count bytes in file usage: ccwc -c <file>"),
+		LinesCountFlag: flag.CommandLine.Bool("l", false, "count lines in file usage: ccwc -l <file>"),
+		WordsCountFlag: flag.CommandLine.Bool("w", false, "count words in file usage: ccwc -l <file>"),
+	}
 	flag.CommandLine.Parse(args)
 
-	if !*byteCount && !*linesCount {
-		return nil, nil, "", errors.New("count what?")
+	if !*wordCountInput.BytesCountFlag && !*wordCountInput.LinesCountFlag && !*wordCountInput.WordsCountFlag {
+		return wordCountInput, errors.New("count what?")
 	}
 	if len(flag.Args()) == 0 || flag.Args()[0] == "" {
-		return nil, nil, "", errors.New("count what? filename is mandatory")
+		return wordCountInput, errors.New("count what? filename is mandatory")
 	}
-	filepath = flag.Args()[0]
-	return linesCount, byteCount, filepath, nil
+	wordCountInput.Filepath = flag.Args()[0]
+	return
 }
 
 type wc struct {

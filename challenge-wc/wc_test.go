@@ -9,6 +9,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWc_validateInputWithCountWordsFlagAndFilepath_ShouldReturnTrue(t *testing.T) {
+	// ARRANGE
+	args := []string{"-w", "filepath"}
+	// ACT
+	wcinput, err := validateInput(args)
+	defer resetFlags()
+
+	// ASSERT
+	assert.Nil(t, err)
+	assert.False(t, *wcinput.BytesCountFlag)
+	assert.False(t, *wcinput.LinesCountFlag)
+	assert.True(t, *wcinput.WordsCountFlag)
+	assert.Equal(t, wcinput.Filepath, "filepath")
+}
+
 func TestWc_WhenInputFileAndWFlagW_ShouldReturnTheExpectedNumberOfWords(t *testing.T) {
 	// ARRANGE
 	expecteNumberoOfWords := 58164
@@ -28,26 +43,26 @@ func TestWc_validateInputWithCountLinesAndFilepath_ShouldReturnTrue(t *testing.T
 	// ARRANGE
 	args := []string{"-l", "filepath"}
 	// ACT
-	linesFlag, bytesCountFlag, filepath, err := validateInput(args)
+	wcinput, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
 	assert.Nil(t, err)
-	assert.False(t, *bytesCountFlag)
-	assert.True(t, *linesFlag)
-	assert.Equal(t, filepath, "filepath")
+	assert.False(t, *wcinput.BytesCountFlag)
+	assert.True(t, *wcinput.LinesCountFlag)
+	assert.Equal(t, wcinput.Filepath, "filepath")
 }
 func TestWc_validateInputWithCountFlagWAndFilepath_ShouldReturnTrue(t *testing.T) {
 	// ARRANGE
 	args := []string{"-w", "filepath"}
 	// ACT
-	_, countFlag, filepath, err := validateInput(args)
+	wcinput, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
 	assert.Nil(t, err)
-	assert.True(t, *countFlag)
-	assert.Equal(t, filepath, "filepath")
+	assert.True(t, *wcinput.WordsCountFlag)
+	assert.Equal(t, wcinput.Filepath, "filepath")
 }
 func TestWc_WhenInputFileAndLFlagL_ShouldReturnTheExpectedNumberOfLines(t *testing.T) {
 	// ARRANGE
@@ -68,20 +83,20 @@ func TestWc_validateInputWithCountFlagAndFilepath_ShouldReturnTrue(t *testing.T)
 	// ARRANGE
 	args := []string{"-c", "filepath"}
 	// ACT
-	_, linesCountFlag, filepath, err := validateInput(args)
+	wcinput, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
 	assert.Nil(t, err)
-	assert.True(t, *linesCountFlag)
-	assert.Equal(t, filepath, "filepath")
+	assert.True(t, *wcinput.BytesCountFlag)
+	assert.Equal(t, wcinput.Filepath, "filepath")
 }
 func TestWc_validateInputWithCountFlagButNoFilepath_ShouldReturnError(t *testing.T) {
 	// ARRANGE
 	args := []string{"-c"}
 
 	// ACT
-	_, _, _, err := validateInput(args)
+	_, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
@@ -93,7 +108,7 @@ func TestWc_validateInputWithoutArguments_ShouldReturnError(t *testing.T) {
 	args := []string{}
 
 	// ACT
-	_, _, _, err := validateInput(args)
+	_, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
