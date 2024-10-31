@@ -9,21 +9,47 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWc_WhenInputFileAndWFlagW_ShouldReturnTheExpectedNumberOfWords(t *testing.T) {
+	// ARRANGE
+	expecteNumberoOfWords := 58164
+	wc, err := NewWc("./test.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resetFlags()
+	// ACT
+	numberOfWords := wc.numberOfWords
+
+	// ASSERT
+	assert.Equal(t, expecteNumberoOfWords, numberOfWords)
+}
+
 func TestWc_validateInputWithCountLinesAndFilepath_ShouldReturnTrue(t *testing.T) {
 	// ARRANGE
 	args := []string{"-l", "filepath"}
 	// ACT
-	linesFlag, countFlag, filepath, err := validateInput(args)
+	linesFlag, bytesCountFlag, filepath, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
 	assert.Nil(t, err)
-	assert.False(t, *countFlag)
+	assert.False(t, *bytesCountFlag)
 	assert.True(t, *linesFlag)
 	assert.Equal(t, filepath, "filepath")
 }
+func TestWc_validateInputWithCountFlagWAndFilepath_ShouldReturnTrue(t *testing.T) {
+	// ARRANGE
+	args := []string{"-w", "filepath"}
+	// ACT
+	_, countFlag, filepath, err := validateInput(args)
+	defer resetFlags()
 
-func TestWc_WhenInputFileAndLFlag_ShouldReturnTheExpectedNumberOfLines(t *testing.T) {
+	// ASSERT
+	assert.Nil(t, err)
+	assert.True(t, *countFlag)
+	assert.Equal(t, filepath, "filepath")
+}
+func TestWc_WhenInputFileAndLFlagL_ShouldReturnTheExpectedNumberOfLines(t *testing.T) {
 	// ARRANGE
 	expecteNumberoOfRows := 7145
 	wc, err := NewWc("./test.txt")
@@ -42,12 +68,12 @@ func TestWc_validateInputWithCountFlagAndFilepath_ShouldReturnTrue(t *testing.T)
 	// ARRANGE
 	args := []string{"-c", "filepath"}
 	// ACT
-	_, countFlag, filepath, err := validateInput(args)
+	_, linesCountFlag, filepath, err := validateInput(args)
 	defer resetFlags()
 
 	// ASSERT
 	assert.Nil(t, err)
-	assert.True(t, *countFlag)
+	assert.True(t, *linesCountFlag)
 	assert.Equal(t, filepath, "filepath")
 }
 func TestWc_validateInputWithCountFlagButNoFilepath_ShouldReturnError(t *testing.T) {

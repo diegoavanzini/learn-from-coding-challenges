@@ -126,3 +126,14 @@ func (w *wc) readFile(inputFile string) error {
 ```
 ora é necessario introdurre il flag a linea di comando che dice di calcolare il numero di linee quindi altro test rosso che andiamo a mettere a posto.
 E se inserisco piú flag ritorno  il conteggio di linee e bytes.
+
+
+# step 3
+
+in questo step dobbiamo calcolare il numero di parole nel testo. Il procedimento é il solito: test rosso per il nuovo conteggio => implementazione => flag verde e idem per il nuovo flag `-w`
+
+Dopo vari tentativi ho trovato che invece di contare le parole sarebbe piú furbo e semplice contare il numero di spazi tra una parola e l'altra con una semplice espressione regolare `\s+` (cerca tutti i match con i spazi che si ripetono da una a piú volte conscutivamente)
+
+Il test `TestWc_WhenInputFileAndLFlagL_ShouldReturnTheExpectedNumberOfLines` diventa verde.
+
+Ora non ci resta che testare e implementare l'input con il flag `-w`

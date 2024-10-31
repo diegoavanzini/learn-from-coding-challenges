@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 )
 
 func main() {
@@ -49,6 +50,7 @@ func validateInput(args []string) (linesCount, byteCount *bool, filepath string,
 }
 
 type wc struct {
+	numberOfWords int
 	numberOfLines int
 	numberOfBytes int
 	filepath      string
@@ -62,6 +64,8 @@ func (w *wc) readFile(inputFile string) error {
 	buf := make([]byte, 32*1024)
 	for {
 		c, err := r.Read(buf)
+		re := regexp.MustCompile(`\s+`)
+		w.numberOfWords += len(re.FindAllString(string(buf[:c]), -1))
 		w.numberOfLines += bytes.Count(buf[:c], []byte{'\n'})
 		w.numberOfBytes += c
 		switch {
