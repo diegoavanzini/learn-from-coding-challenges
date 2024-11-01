@@ -142,10 +142,18 @@ Ora non ci resta che testare e implementare l'input con il flag `-w` ma a questo
 
 Creo la struttura `WordCountInput` che contiene i 3 flag in ingresso al nostro tool e il `filepath` questo richiede un pó di refactoring ma mi permette di non modificare tutti gli utilizzatori del `validateFlag` ogni volta che aggiungo un nuovo flag.
 
-# step 4
+# [step 4](./commit/81845ca)
 
 in questo step si aggiunge il flag `-m` che serve per contare il numero di caratteri.
 
 nella richiesta viene fatto presente che la risposta dipende dal proprio "locale", per golang ho trovato questa pagina [https://go.dev/blog/matchlang](https://go.dev/blog/matchlang) che sembra interessante... inoltre ho visto che esiste il modulo `utf8` che espone la funzione `utf8.RuneCountInString(str)` che ci viene in aiuto. Proviamolo creando prima il test per vedere se i conti tornano.
 
 Test aggiunto, implementazione eseguita e sembra tutto ok, aggiungo il nuovo flag.
+
+# [step 5](./commit/81845ca)
+
+in questo step si vuole che senza nessuna opzione ma solo il nome del file in ingresso vengano visualizzati i primi tre contatori come se passassi `-c` `-l` e `-v`.
+
+La modifica per gestire il caso senza parametri ha ovviamente rotto il test che controllava che ci fosse almeno un parametro e in caso contrario si aspettava un errore.
+
+É stata richiesta anche la modifica dell'output del tool. I test in questo caso sono a mano. 

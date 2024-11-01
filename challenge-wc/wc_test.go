@@ -9,6 +9,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWc_validateInputWithNoFlagAndFilepath_ShouldReturnCountBytesLineAndWords(t *testing.T) {
+	// ARRANGE
+	args := []string{"filepath"}
+	// ACT
+	wcinput, err := validateInput(args)
+	defer resetFlags()
+
+	// ASSERT
+	assert.Nil(t, err)
+	assert.True(t, *wcinput.BytesCountFlag)
+	assert.True(t, *wcinput.LinesCountFlag)
+	assert.True(t, *wcinput.WordsCountFlag)
+	assert.False(t, *wcinput.CharsCountFlag)
+	assert.Equal(t, wcinput.Filepath, "filepath")
+}
+
 func TestWc_WhenInputFileAndWFlagM_ShouldReturnTheExpectedNumberOfCharacters(t *testing.T) {
 	// ARRANGE
 	expecteNumberoOfChars := 339292
@@ -143,7 +159,7 @@ func TestWc_validateInputWithoutArguments_ShouldReturnError(t *testing.T) {
 
 	// ASSERT
 	assert.NotNil(t, err)
-	assert.Equal(t, "count what?", err.Error())
+	assert.Equal(t, "count what? filename is mandatory", err.Error())
 }
 
 func TestWc_WhenInputFilePathIsWrong_ShouldReturnAnError(t *testing.T) {

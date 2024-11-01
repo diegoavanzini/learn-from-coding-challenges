@@ -23,18 +23,17 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
-	if *wcinput.BytesCountFlag {
-		byteCount := wcTool.numberOfBytes
-		fmt.Printf("%d bytes %s\n", byteCount, wcinput.Filepath)
-	}
+	outputString := ""
 	if *wcinput.LinesCountFlag {
-		lineCount := wcTool.numberOfLines
-		fmt.Printf("%d lines %s\n", lineCount, wcinput.Filepath)
+		outputString = fmt.Sprintf("%s  %d", outputString, wcTool.numberOfLines)
 	}
 	if *wcinput.WordsCountFlag {
-		wordsCount := wcTool.numberOfWords
-		fmt.Printf("%d words %s\n", wordsCount, wcinput.Filepath)
+		outputString = fmt.Sprintf("%s  %d", outputString, wcTool.numberOfWords)
 	}
+	if *wcinput.BytesCountFlag {
+		outputString = fmt.Sprintf("%s  %d", outputString, wcTool.numberOfBytes)
+	}
+	fmt.Printf("%s %s\n", outputString, wcinput.Filepath)
 	os.Exit(0)
 }
 
@@ -59,7 +58,9 @@ func validateInput(args []string) (wordCountInput WordCountInput, err error) {
 		!*wordCountInput.LinesCountFlag &&
 		!*wordCountInput.WordsCountFlag &&
 		!*wordCountInput.CharsCountFlag {
-		return wordCountInput, errors.New("count what?")
+		*wordCountInput.BytesCountFlag = true
+		*wordCountInput.WordsCountFlag = true
+		*wordCountInput.LinesCountFlag = true
 	}
 	if len(flag.Args()) == 0 || flag.Args()[0] == "" {
 		return wordCountInput, errors.New("count what? filename is mandatory")
