@@ -9,6 +9,36 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestWc_WhenInputFileAndWFlagM_ShouldReturnTheExpectedNumberOfCharacters(t *testing.T) {
+	// ARRANGE
+	expecteNumberoOfChars := 339292
+	wc, err := NewWc("./test.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resetFlags()
+	// ACT
+	numberOfChars := wc.numberOfChars
+
+	// ASSERT
+	assert.Equal(t, expecteNumberoOfChars, numberOfChars)
+}
+func TestWc_validateInputWithCountCharactersFlagAndFilepath_ShouldReturnTrue(t *testing.T) {
+	// ARRANGE
+	args := []string{"-m", "filepath"}
+	// ACT
+	wcinput, err := validateInput(args)
+	defer resetFlags()
+
+	// ASSERT
+	assert.Nil(t, err)
+	assert.False(t, *wcinput.BytesCountFlag)
+	assert.False(t, *wcinput.LinesCountFlag)
+	assert.False(t, *wcinput.WordsCountFlag)
+	assert.True(t, *wcinput.CharsCountFlag)
+	assert.Equal(t, wcinput.Filepath, "filepath")
+}
+
 func TestWc_validateInputWithCountWordsFlagAndFilepath_ShouldReturnTrue(t *testing.T) {
 	// ARRANGE
 	args := []string{"-w", "filepath"}

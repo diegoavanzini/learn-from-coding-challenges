@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"unicode/utf8"
 )
 
 func main() {
@@ -41,6 +42,7 @@ type WordCountInput struct {
 	WordsCountFlag *bool
 	LinesCountFlag *bool
 	BytesCountFlag *bool
+	CharsCountFlag *bool
 	Filepath       string
 }
 
@@ -49,10 +51,14 @@ func validateInput(args []string) (wordCountInput WordCountInput, err error) {
 		BytesCountFlag: flag.CommandLine.Bool("c", false, "count bytes in file usage: ccwc -c <file>"),
 		LinesCountFlag: flag.CommandLine.Bool("l", false, "count lines in file usage: ccwc -l <file>"),
 		WordsCountFlag: flag.CommandLine.Bool("w", false, "count words in file usage: ccwc -l <file>"),
+		CharsCountFlag: flag.CommandLine.Bool("m", false, "count characters in file usage: ccwc -l <file>"),
 	}
 	flag.CommandLine.Parse(args)
 
-	if !*wordCountInput.BytesCountFlag && !*wordCountInput.LinesCountFlag && !*wordCountInput.WordsCountFlag {
+	if !*wordCountInput.BytesCountFlag &&
+		!*wordCountInput.LinesCountFlag &&
+		!*wordCountInput.WordsCountFlag &&
+		!*wordCountInput.CharsCountFlag {
 		return wordCountInput, errors.New("count what?")
 	}
 	if len(flag.Args()) == 0 || flag.Args()[0] == "" {
@@ -66,6 +72,7 @@ type wc struct {
 	numberOfWords int
 	numberOfLines int
 	numberOfBytes int
+	numberOfChars int
 	filepath      string
 }
 
@@ -81,6 +88,7 @@ func (w *wc) readFile(inputFile string) error {
 		w.numberOfWords += len(re.FindAllString(string(buf[:c]), -1))
 		w.numberOfLines += bytes.Count(buf[:c], []byte{'\n'})
 		w.numberOfBytes += c
+		w.numberOfChars += utf8.RuneCount(buf[:c])
 		switch {
 		case err == io.EOF:
 			return nil
