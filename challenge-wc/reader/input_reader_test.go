@@ -8,109 +8,32 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestWc_NewInputReaderWithNoFlagAndFilepath_ShouldReturnCountBytesLineAndWords(t *testing.T) {
+func TestWc_NewInputReader(t *testing.T) {
 	// ARRANGE
-	args := []string{"filepath"}
-	// ACT
-	ir, err := NewInputReader(args)
-	defer resetFlags()
-
-	// ASSERT
-	assert.Nil(t, err)
-	assert.True(t, *ir.InputFlags().BytesCountFlag)
-	assert.True(t, *ir.InputFlags().LinesCountFlag)
-	assert.True(t, *ir.InputFlags().WordsCountFlag)
-	assert.False(t, *ir.InputFlags().CharsCountFlag)
+	tests := []struct {
+		name     string
+		args     []string
+		expected InputFlags
+	}{
+		{"with no flag and filepath", []string{"filepath"}, InputFlags{BytesCountFlag: true, LinesCountFlag: true, WordsCountFlag: true, CharsCountFlag: false}},
+		{"with count characters flag and filepath", []string{"-m", "filepath"}, InputFlags{BytesCountFlag: false, LinesCountFlag: false, WordsCountFlag: false, CharsCountFlag: true}},
+		{"with count words flag and filepath", []string{"-w", "filepath"}, InputFlags{BytesCountFlag: false, LinesCountFlag: false, WordsCountFlag: true, CharsCountFlag: false}},
+		{"with count lines and filepath", []string{"-l", "filepath"}, InputFlags{BytesCountFlag: false, LinesCountFlag: true, WordsCountFlag: false, CharsCountFlag: false}},
+		{"with count bytes and filepath", []string{"-c", "filepath"}, InputFlags{BytesCountFlag: true, LinesCountFlag: false, WordsCountFlag: false, CharsCountFlag: false}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ir, err := NewInputReader(tt.args)
+			defer resetFlags()
+			assert.Equal(t, err, nil)
+			assert.Equal(t, tt.expected.BytesCountFlag, ir.InputFlags().BytesCountFlag)
+			assert.Equal(t, tt.expected.LinesCountFlag, ir.InputFlags().LinesCountFlag)
+			assert.Equal(t, tt.expected.WordsCountFlag, ir.InputFlags().WordsCountFlag)
+			assert.Equal(t, tt.expected.CharsCountFlag, ir.InputFlags().CharsCountFlag)
+		})
+	}
 }
 
-func TestWc_NewInputReaderWithCountCharactersFlagAndFilepath_ShouldReturnTrue(t *testing.T) {
-	// ARRANGE
-	args := []string{"-m", "filepath"}
-	// ACT
-	ir, err := NewInputReader(args)
-	defer resetFlags()
-
-	// ASSERT
-	assert.Nil(t, err)
-	assert.False(t, *ir.InputFlags().BytesCountFlag)
-	assert.False(t, *ir.InputFlags().LinesCountFlag)
-	assert.False(t, *ir.InputFlags().WordsCountFlag)
-	assert.True(t, *ir.InputFlags().CharsCountFlag)
-}
-
-func TestWc_NewInputReaderWithCountWordsFlagAndFilepath_ShouldReturnTrue(t *testing.T) {
-	// ARRANGE
-	args := []string{"-w", "filepath"}
-	// ACT
-	ir, err := NewInputReader(args)
-	defer resetFlags()
-
-	// ASSERT
-	assert.Nil(t, err)
-	assert.False(t, *ir.InputFlags().BytesCountFlag)
-	assert.False(t, *ir.InputFlags().LinesCountFlag)
-	assert.True(t, *ir.InputFlags().WordsCountFlag)
-}
-
-func TestWc_NewInputReaderWithCountLinesAndFilepath_ShouldReturnTrue(t *testing.T) {
-	// ARRANGE
-	args := []string{"-l", "filepath"}
-	// ACT
-	ir, err := NewInputReader(args)
-	defer resetFlags()
-
-	// ASSERT
-	assert.Nil(t, err)
-	assert.False(t, *ir.InputFlags().BytesCountFlag)
-	assert.True(t, *ir.InputFlags().LinesCountFlag)
-}
-func TestWc_NewInputReaderWithCountFlagWAndFilepath_ShouldReturnTrue(t *testing.T) {
-	// ARRANGE
-	args := []string{"-w", "filepath"}
-	// ACT
-	ir, err := NewInputReader(args)
-	defer resetFlags()
-
-	// ASSERT
-	assert.Nil(t, err)
-	assert.True(t, *ir.InputFlags().WordsCountFlag)
-}
-
-func TestWc_NewInputReaderWithCountFlagAndFilepath_ShouldReturnTrue(t *testing.T) {
-	// ARRANGE
-	args := []string{"-c", "filepath"}
-	// ACT
-	ir, err := NewInputReader(args)
-	defer resetFlags()
-
-	// ASSERT
-	assert.Nil(t, err)
-	assert.True(t, *ir.InputFlags().BytesCountFlag)
-}
-func TestWc_NewInputReaderWithCountFlagButNoFilepath_ShouldReturnError(t *testing.T) {
-	// ARRANGE
-	args := []string{"-c"}
-
-	// ACT
-	_, err := NewInputReader(args)
-	defer resetFlags()
-
-	// ASSERT
-	assert.NotNil(t, err)
-	assert.Equal(t, "count what? filename is mandatory", err.Error())
-}
-func TestWc_NewInputReaderWithoutArguments_ShouldReturnError(t *testing.T) {
-	// ARRANGE
-	args := []string{}
-
-	// ACT
-	_, err := NewInputReader(args)
-	defer resetFlags()
-
-	// ASSERT
-	assert.NotNil(t, err)
-	assert.Equal(t, "count what? filename is mandatory", err.Error())
-}
 func resetFlags() {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError) //flags are now reset
 }

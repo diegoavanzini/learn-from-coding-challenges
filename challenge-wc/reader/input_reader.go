@@ -13,10 +13,10 @@ type InputReader interface {
 }
 
 type InputFlags struct {
-	WordsCountFlag *bool
-	LinesCountFlag *bool
-	BytesCountFlag *bool
-	CharsCountFlag *bool
+	WordsCountFlag bool
+	LinesCountFlag bool
+	BytesCountFlag bool
+	CharsCountFlag bool
 }
 
 func NewInputReader(args []string) (InputReader, error) {
@@ -42,29 +42,37 @@ func NewInputReader(args []string) (InputReader, error) {
 }
 
 func readInputFlags(args []string) (inputFlags InputFlags, err error) {
-	inputFlags = InputFlags{
-		BytesCountFlag: flag.CommandLine.Bool("c", false, "count bytes in file usage: ccwc -c <file>"),
-		LinesCountFlag: flag.CommandLine.Bool("l", false, "count lines in file usage: ccwc -l <file>"),
-		WordsCountFlag: flag.CommandLine.Bool("w", false, "count words in file usage: ccwc -l <file>"),
-		CharsCountFlag: flag.CommandLine.Bool("m", false, "count characters in file usage: ccwc -l <file>"),
-	}
-	flag.CommandLine.Parse(args)
+	bytesCountFlag := flag.CommandLine.Bool("c", false, "count bytes in file usage: ccwc -c <file>")
+	linesCountFlag := flag.CommandLine.Bool("l", false, "count lines in file usage: ccwc -l <file>")
+	wordsCountFlag := flag.CommandLine.Bool("w", false, "count words in file usage: ccwc -l <file>")
+	charsCountFlag := flag.CommandLine.Bool("m", false, "count characters in file usage: ccwc -l <file>")
 
-	err = validateInput(inputFlags)
+	err = flag.CommandLine.Parse(args)
+	if err != nil {
+		return inputFlags, err
+	}
+
+	inputFlags = InputFlags{
+		WordsCountFlag: *wordsCountFlag,
+		LinesCountFlag: *linesCountFlag,
+		BytesCountFlag: *bytesCountFlag,
+		CharsCountFlag: *charsCountFlag,
+	}
+	err = validateInput(&inputFlags)
 	if err != nil {
 		return inputFlags, err
 	}
 	return
 }
 
-func validateInput(inputFlags InputFlags) error {
-	if !*inputFlags.BytesCountFlag &&
-		!*inputFlags.LinesCountFlag &&
-		!*inputFlags.WordsCountFlag &&
-		!*inputFlags.CharsCountFlag {
-		*inputFlags.BytesCountFlag = true
-		*inputFlags.WordsCountFlag = true
-		*inputFlags.LinesCountFlag = true
+func validateInput(inputFlags *InputFlags) error {
+	if !inputFlags.BytesCountFlag &&
+		!inputFlags.LinesCountFlag &&
+		!inputFlags.WordsCountFlag &&
+		!inputFlags.CharsCountFlag {
+		inputFlags.BytesCountFlag = true
+		inputFlags.WordsCountFlag = true
+		inputFlags.LinesCountFlag = true
 	}
 	if len(flag.Args()) == 0 || flag.Args()[0] == "" {
 		return errors.New("count what? filename is mandatory")

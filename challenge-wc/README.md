@@ -193,4 +193,4 @@ Mi viene spontaneo creare un `inputReader`, un'interfaccia che espone il metodo 
 L' `inputReader` verrá passato poi nella creazione del tool che chiamando semplicemente il metodo Read() dell'implementazione corretta otterrá il contenuto ed eseguirá il conteggio dei contaori e in base ai flag in ingresso restituirá i valori calcolati al main che si preoccuperá di stamparli a video nel modo corretto in base ai flag impostati in ingresso.
 
 Ho quindi introdotto il package reader con l'interfaccia e le relative implementazioni e costruttori e i test che prima testavano il `validateFlag` adesso verificano che i flag restituiti dall'inputReader siano gli stessi.
- 
+
