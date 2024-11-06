@@ -1,4 +1,4 @@
-module ccwc
+module github.com/diegoavanzini/learnfromcodechallenges/challenge-wc
 
 go 1.23.0
 

@@ -150,10 +150,47 @@ nella richiesta viene fatto presente che la risposta dipende dal proprio "locale
 
 Test aggiunto, implementazione eseguita e sembra tutto ok, aggiungo il nuovo flag.
 
-# [step 5](./commit/81845ca)
+# [step 5](./commit/9748ce4)
 
 in questo step si vuole che senza nessuna opzione ma solo il nome del file in ingresso vengano visualizzati i primi tre contatori come se passassi `-c` `-l` e `-v`.
 
 La modifica per gestire il caso senza parametri ha ovviamente rotto il test che controllava che ci fosse almeno un parametro e in caso contrario si aspettava un errore.
 
 É stata richiesta anche la modifica dell'output del tool. I test in questo caso sono a mano. 
+
+# [step 6](./commit/9748ce4)
+
+in questo step viene richiesto di poter concatenare il tool a linea di comando con altri tool, ricevendo in input il risultato del comando che lo precede con lo Unix pipe.
+In Unix il pipe `|` é un costrutto molto potente che permette di redirigere l'output di un comando all'input del comando successivo, questo permette, pur utilizzando dei comandi semplici in sequenza, di creare workflow complessi.
+
+Per capire se il nostro comando é lanciato con il pipe é ecessario eseguire questa "magia"
+```golang
+func IsPipe() (bool, error) {
+	fi, err := os.Stdin.Stat()
+	if err != nil {
+		return false, err
+	}
+	modeChar := fi.Mode() & os.ModeCharDevice
+	return modeChar == 0, nil
+}
+``` 
+
+`os.Stdin` permette di leggere lo standard input e con il metodo `Stat()` possiamo avere informazioni su di esso, in particolare il Mode é un valore integer che combina diversi flags che descrivono i permessi e alcuni attributi in questo caso dello standard input. Il Mode é definito come una maschera di bit e ogni bit corrisponde a un determinato attributo o permesso.
+L'operatore bitwise compara i bit di `fi.Mode()` uno ad uno con la costante `os.ModeCharDevice` che é `000001000000000000000000000`.
+
+|& | pipe input | no pipe input| 
+| ---- | ---- | ---- |
+| os.ModeCharDevice| 000001000000000000000000000 | 00000`1`000000000000000000000 |
+| fi.Mode() | 010000000000000000110110110 |10000`1`000000000000110110110|
+| risultato | 000000000000000000000000000 |00000`1`000000000000000000000 |
+
+Il valore del primo in caso di stdin valorizzato (pipe di unix) é `10000000000000000110110110` in questo caso il risultato del bitwise é `00000000` perché non ci sono due bit a 1 nella stessa posizione mentre se lo stdin non é valorizzato il `fi.Mode()` vale `100001000000000000110110110` abbiamo il bit in posizione 7 valorizzato a 1 in entrambi. Quindi quando il bitwise ritorna 0 (`modeChar == 0`) siamo nella situazione di pipe.
+
+Ok ora che siamo in grado di capire se l'input arriva dalla pipeline o se dobbiamo prenderlo da un file é necessario capire come distinguere i due casi e comportarsi diversamente a seconda che siamo in un caso o nell'altro. Quello che cambia é il modo di leggere l'input.
+Sento forte odore di strategy pattern... vediamo come implementarlo.
+
+Mi viene spontaneo creare un `inputReader`, un'interfaccia che espone il metodo `Read()` e che verrá implementata dalla struct `FileInputReader` che si occupa di leggere il file e da `PipeInputReader` che si occupa di leggere dallo stdin. Il metodo Read ritorna un array di byte con il contenuto letto e un eventuale errore. Il costruttore esegue la validazione dei flag in ingresso, determina che tipo di input deve leggere e crea l'input reader corretto.
+L' `inputReader` verrá passato poi nella creazione del tool che chiamando semplicemente il metodo Read() dell'implementazione corretta otterrá il contenuto ed eseguirá il conteggio dei contaori e in base ai flag in ingresso restituirá i valori calcolati al main che si preoccuperá di stamparli a video nel modo corretto in base ai flag impostati in ingresso.
+
+Ho quindi introdotto il package reader con l'interfaccia e le relative implementazioni e costruttori e i test che prima testavano il `validateFlag` adesso verificano che i flag restituiti dall'inputReader siano gli stessi.
+ 
