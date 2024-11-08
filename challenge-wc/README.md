@@ -194,3 +194,4 @@ L' `inputReader` verrá passato poi nella creazione del tool che chiamando sempl
 
 Ho quindi introdotto il package reader con l'interfaccia e le relative implementazioni e costruttori e i test che prima testavano il `validateFlag` adesso verificano che i flag restituiti dall'inputReader siano gli stessi.
 
+Un interessante articolo [https://lucapette.me/writing/writing-integration-tests-for-a-go-cli-application/]](https://lucapette.me/writing/writing-integration-tests-for-a-go-cli-application/) sembra rispondere alla mia necessitá di eseguire test di integrazione che permettono di eseguire il binario con i parametri in ingresso e verificare l'output. Ho quindi creato la cartella `integration` con i test per ogni step e mi sono accorto che nel main mi ero perso la gestione del conteggio dei caratteri. Questo mi mette in una situazione di ulteriore sicurezza. 

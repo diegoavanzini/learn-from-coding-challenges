@@ -33,6 +33,9 @@ func main() {
 	if *wcinput.BytesCountFlag {
 		outputString = fmt.Sprintf("%s  %d", outputString, wcTool.numberOfBytes)
 	}
+	if *wcinput.CharsCountFlag {
+		outputString = fmt.Sprintf("%s  %d", outputString, wcTool.numberOfChars)
+	}
 	fmt.Printf("%s %s\n", outputString, wcinput.Filepath)
 	os.Exit(0)
 }
