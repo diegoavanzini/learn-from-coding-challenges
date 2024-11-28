@@ -1,4 +1,4 @@
-package reader
+package behaviours
 
 import (
 	"flag"
@@ -23,17 +23,17 @@ func TestWc_NewInputReader(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ir, err := NewInputReader(tt.args)
-			defer resetFlags()
+			ir, err := readInputFlags(tt.args)
+			defer ResetFlags()
 			assert.Equal(t, err, nil)
-			assert.Equal(t, tt.expected.BytesCountFlag, ir.InputFlags().BytesCountFlag)
-			assert.Equal(t, tt.expected.LinesCountFlag, ir.InputFlags().LinesCountFlag)
-			assert.Equal(t, tt.expected.WordsCountFlag, ir.InputFlags().WordsCountFlag)
-			assert.Equal(t, tt.expected.CharsCountFlag, ir.InputFlags().CharsCountFlag)
+			assert.Equal(t, tt.expected.BytesCountFlag, ir.BytesCountFlag)
+			assert.Equal(t, tt.expected.LinesCountFlag, ir.LinesCountFlag)
+			assert.Equal(t, tt.expected.WordsCountFlag, ir.WordsCountFlag)
+			assert.Equal(t, tt.expected.CharsCountFlag, ir.CharsCountFlag)
 		})
 	}
 }
 
-func resetFlags() {
+func ResetFlags() {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError) //flags are now reset
 }

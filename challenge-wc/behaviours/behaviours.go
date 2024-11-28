@@ -1,15 +1,23 @@
-package reader
+package behaviours
 
 import (
 	"errors"
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 )
 
-type InputReader interface {
-	Read() ([]byte, error)
-	InputFlags() InputFlags
+type WCToolBehaviour interface {
+	ReadInput() ([]byte, error)
+	WriteResult(Counters) string
+}
+
+type Counters struct {
+	NumberOfWords int
+	NumberOfLines int
+	NumberOfBytes int
+	NumberOfChars int
 }
 
 type InputFlags struct {
@@ -19,7 +27,24 @@ type InputFlags struct {
 	CharsCountFlag bool
 }
 
-func NewInputReader(args []string) (InputReader, error) {
+func (inputFlags *InputFlags) CountersStringResult(counters Counters) string {
+	var outputString string
+	if inputFlags.LinesCountFlag {
+		outputString += "  " + strconv.Itoa(counters.NumberOfLines)
+	}
+	if inputFlags.WordsCountFlag {
+		outputString += "  " + strconv.Itoa(counters.NumberOfWords)
+	}
+	if inputFlags.BytesCountFlag {
+		outputString += "  " + strconv.Itoa(counters.NumberOfBytes)
+	}
+	if inputFlags.CharsCountFlag {
+		outputString += "  " + strconv.Itoa(counters.NumberOfChars)
+	}
+	return outputString
+}
+
+func Create(args []string) (WCToolBehaviour, error) {
 	inputFlags, err := readInputFlags(args)
 	if err != nil {
 		fmt.Println(err.Error())
@@ -31,14 +56,12 @@ func NewInputReader(args []string) (InputReader, error) {
 		os.Exit(1)
 	}
 	if fromPipe {
-		return &PipeInputReader{
-			inputFlags: inputFlags,
-		}, nil
+		return NewPipeInputBehaviour(inputFlags)
 	}
-	return &FileInputReader{
-		inputFlags: inputFlags,
-		filepath:   flag.Args()[0],
-	}, nil
+	if len(flag.Args()) == 0 || flag.Args()[0] == "" {
+		return nil, errors.New("filepath is required")
+	}
+	return NewFileInputBehaviour(inputFlags, flag.Args()[0])
 }
 
 func readInputFlags(args []string) (inputFlags InputFlags, err error) {
@@ -73,9 +96,6 @@ func validateInput(inputFlags *InputFlags) error {
 		inputFlags.BytesCountFlag = true
 		inputFlags.WordsCountFlag = true
 		inputFlags.LinesCountFlag = true
-	}
-	if len(flag.Args()) == 0 || flag.Args()[0] == "" {
-		return errors.New("count what? filename is mandatory")
 	}
 	return nil
 }

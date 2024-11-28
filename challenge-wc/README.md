@@ -1,17 +1,23 @@
 # Building Words Counter Tool
-from [https://codingchallenges.fyi](https://codingchallenges.fyi)
+from [https://codingchallenges.fyi/challenges/challenge-wc](https://codingchallenges.fyi/challenges/challenge-wc)
 
-# step 0
+## cosa ho imparato
+- come gestire l'input dal comando precedente con l'operatore pipe di linux
+- ripasso di bitwise per determinare se l'input é dal comando che precede (|)
+- ripasso strategy pattern
+- test di integrazione di un comando eseguibile
+- gestione dei parametri in input con la libreria ``flag``
 
-Iniziando dalla  challenge https://codingchallenges.fyi/challenges/challenge-wc del contatore di parole ho implementato lo step zero.
 
-Creato il main vuoto, un test vuoto, un file "wc.go" che conterrá tutta la logica, inizializzato il modulo "wc" e la cartella "target" con il compilato che attualemnte non fa niente.
+# [step 0](./commit/d9e1a7186c91743caf368f3a5907e8a395b343e4)
 
-# step 1
+Iniziando dalla  challenge https://codingchallenges.fyi/challenges/challenge-wc del contatore di parole lo step zerosi concretizza in un main vuoto, un test vuoto, un file "wc.go" che conterrá tutta la logica, inizializzato il modulo "wc" e la cartella "target" con il compilato che attualemnte non fa niente.
+
+# [step 1](./commit/5a19d6ba0650db507c80b61bcff3c211d0e8aef8)
 
 in questo step il tool "ccwc" deve restituire il numero di bytes in un file, utilizzando il file test.txt ci si aspetta (expected) 342190 bytes. 
 
-il package `os` mette a disposizione il metodo `ReadFile` che restituisce un array di byte e va da se che contarli é semplice come contare la `len` di un array.
+il package `os` mette a disposizione il metodo `ReadFile` che restituisce un array di byte e va da sé che contarli é semplice come eseguire la `len()` di un array.
 
 ```golang
 content, err := os.ReadFile(inputFile)
@@ -19,7 +25,7 @@ if err != nil {
     return nil, err
 }
 ```
-la prima cosa che ho creato cercando un approccio di tipo [TDD](https://it.wikipedia.org/wiki/Test_driven_development) creando il test `TestWc_WhenInputFile_ShouldReturnTheExpectedNumberOfBytes` mettendoci dentro quello che mi aspetto e cercando di farlo compilare. In particolare ho creato una struttura `wc` con il suo costruttore `NewWc` che riceve il path del file di cui deve contare i bytes ed espone il metodo `CountBytes()`. In prima battuta il metodo ritornerá 0 bytes mentre nell'assert ce ne aspettiamo 342190 se utilizziamo il file `test.txt`... il test quindi fallirá.
+la prima cosa che ho creato cercando un approccio di tipo [TDD](https://it.wikipedia.org/wiki/Test_driven_development) é il test `TestWc_WhenInputFile_ShouldReturnTheExpectedNumberOfBytes` mettendoci dentro quello che mi aspetto e cercando di farlo compilare. In particolare ho creato una struttura `wc` con il suo costruttore `NewWc` che riceve il path del file di cui deve contare i bytes ed espone il metodo `CountBytes()`. In prima battuta il metodo ritornerá 0 bytes mentre nell'assert ce ne aspettiamo 342190 se utilizziamo il file `test.txt`... il test quindi fallirá.
 ```
 --- FAIL: TestWc_WhenInputFile_ShouldReturnTheExpectedNumberOfBytes (0.00s)
     c:\GoCode\src\github.com\diegoavanzini\learnfromcodechallenges\challenge-wc\wc_test.go:17: 
@@ -32,15 +38,15 @@ FAIL
 FAIL	ccwc	1.183s
 FAIL
 ```
-vedi commit
+vedi [commit](./commit/ba9ecbc576dbe4387113f6fc4602257eedcd14f3).
 
-vado ad implementare il metodo `CountBytes()` in modo da far passare il test
+Vado cosí ad implementare il metodo `CountBytes()` in modo da far passare il test
 ```
 $ make test
 go test .
 ok      ccwc    1.006s
 ```
-abbiamo il nostro primo test verde! 
+abbiamo [il nostro primo test verde](./commit/ba9e0bce40790875408dd4ee9981113829139341ab1d)! 
 
 Aggiungo il test che verifica, in caso di file errato, che il metodo ritorni un errore.
 
@@ -82,9 +88,9 @@ flag.CommandLine.Parse(args)
 ```
 vado a fare il parsing degli argomenti.
 
-Gli argomenti in ingresso saranno quelli passati a line di comando `os.Args[1:]` togliendo il primo che é il nome del comando oppure quelli passati nel test.
+Gli argomenti in ingresso saranno quelli passati a line di comando `os.Args[1:]` (togliendo il primo che é il nome del comando) oppure quelli passati nel test.
 
-Da notare la chiamata in defer della funzione `resetFlags()`, questa é necessaria in quando la dichiarazione di `CommandLine` é statica, questo fa si che quando lancio il secondo test che va a ridefinire `c` questo vada in errore ma noi non lo vogliamo. Per evitarlo lanciamo questo 
+Da notare la chiamata in `defer` della funzione `resetFlags()`, questa é necessaria in quando la dichiarazione di `CommandLine` é statica, questo fa si che quando lancio il secondo test che va a ridefinire `c` non vada in errore. 
 ```golang
 func resetFlags() {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError) //flags are now reset
@@ -94,13 +100,13 @@ func resetFlags() {
 altri test che ho ritenuto utili sono quando il flag é presente ma non c´é il nome del file (`TestWc_validateInputWithCountFlagButNoFilepath_ShouldReturnError`) oppure c´é il nome del file ma é sbagliato (`TestWc_WhenInputFilePathIsWrong_ShouldReturnAnError`).
 
 
-# step 2
+# [step 2](./commit/a3cb4fb94b68dcd8ba63eb6d8b4da956193de99d)
 
 in questo step dobbiamo calcolare il numero di righe in un file, utilizzando il file test.txt ci si aspetta (expected) 7145 righe.
 
 Iniziamo come al solito dal test con il file di txt in dotazione e ritorno in prima battuta 0 facendo fallire il test.
 
-Il test si aspetta il metodo `CountRows` associato alla struc `wc`, questo ritornerá il numero di linee. Per farlo deve anch'esso andare a leggere il file in input e vien da se che é necessario in questo caso entrare nel merito del contenuto del file per individuare gli a capo `[]byte{'\n'}`.
+Il test si aspetta il metodo `CountRows` associato alla struct `wc`, questo ritornerá il numero di linee. Per farlo deve anch'esso andare a leggere il file in input e vien da sé che é necessario in questo caso entrare nel merito del contenuto del file per individuare gli a capo `[]byte{'\n'}`.
 
 Sia che si tratti di leggere il numero di bytes o il numero di righe é necessaria la lettura del file. Per leggere il file si usa il descrittore ritornato da `os.Open(w.filepath)` e utilizzando il metodo `Read` andiamo a leggere e mettere il contenuto in un array di byte.
 
@@ -130,7 +136,7 @@ ora é necessario introdurre il flag a linea di comando che dice di calcolare il
 E se inserisco piú flag ritorno  il conteggio di linee e bytes.
 
 
-# step 3
+# [step 3](.commit/8e9b815f6498cf3e4d2da3a77b08cd4c720730e9)
 
 in questo step dobbiamo calcolare il numero di parole nel testo. Il procedimento é il solito: test rosso per il nuovo conteggio => implementazione => flag verde e idem per il nuovo flag `-w`
 
@@ -138,9 +144,9 @@ Dopo vari tentativi ho trovato che invece di contare le parole sarebbe piú furb
 
 Il test `TestWc_WhenInputFileAndLFlagL_ShouldReturnTheExpectedNumberOfLines` diventa verde.
 
-Ora non ci resta che testare e implementare l'input con il flag `-w` ma a questo punto la funzione validateInput dovrebbe ritornare 3 flag e si rende necessario dare un significato a questo output raggruppando questi flag in una struttura.
+Ora non ci resta che testare e implementare l'input con il flag `-w` ma a questo punto la funzione `validateInput` dovrebbe ritornare 3 flag e si rende necessario dare un significato a questo output raggruppando questi flag in una struttura.
 
-Creo la struttura `WordCountInput` che contiene i 3 flag in ingresso al nostro tool e il `filepath` questo richiede un pó di refactoring ma mi permette di non modificare tutti gli utilizzatori del `validateFlag` ogni volta che aggiungo un nuovo flag.
+Creo la struttura `WordCountInput` che contiene i 3 flag in ingresso al nostro tool e il `filepath`. Questa modifica richiede un pó di refactoring ma mi permette di non modificare tutti gli utilizzatori del `validateFlag` ogni volta che aggiungo un nuovo flag.
 
 # [step 4](./commit/81845ca)
 
@@ -150,7 +156,7 @@ nella richiesta viene fatto presente che la risposta dipende dal proprio "locale
 
 Test aggiunto, implementazione eseguita e sembra tutto ok, aggiungo il nuovo flag.
 
-# [step 5](./commit/9748ce4)
+# [step 5](./commit/9748ce45331cbc826402346431ee25017b0f6f03)
 
 in questo step si vuole che senza nessuna opzione ma solo il nome del file in ingresso vengano visualizzati i primi tre contatori come se passassi `-c` `-l` e `-v`.
 
@@ -158,12 +164,12 @@ La modifica per gestire il caso senza parametri ha ovviamente rotto il test che 
 
 É stata richiesta anche la modifica dell'output del tool. I test in questo caso sono a mano. 
 
-# [step 6](./commit/9748ce4)
+# [step 6](./commit/d467fede15f0895ac973976dfc4dd98fef395109)
 
-in questo step viene richiesto di poter concatenare il tool a linea di comando con altri tool, ricevendo in input il risultato del comando che lo precede con lo Unix pipe.
+In questo step viene richiesto di poter concatenare il tool a linea di comando con altri tool, ricevendo in input il risultato del comando che lo precede con lo Unix pipe.
 In Unix il pipe `|` é un costrutto molto potente che permette di redirigere l'output di un comando all'input del comando successivo, questo permette, pur utilizzando dei comandi semplici in sequenza, di creare workflow complessi.
 
-Per capire se il nostro comando é lanciato con il pipe é ecessario eseguire questa "magia"
+Per capire se il nostro comando é lanciato con il pipe é necessario eseguire questa "magia"
 ```golang
 func IsPipe() (bool, error) {
 	fi, err := os.Stdin.Stat()
@@ -189,9 +195,18 @@ Il valore del primo in caso di stdin valorizzato (pipe di unix) é `100000000000
 Ok ora che siamo in grado di capire se l'input arriva dalla pipeline o se dobbiamo prenderlo da un file é necessario capire come distinguere i due casi e comportarsi diversamente a seconda che siamo in un caso o nell'altro. Quello che cambia é il modo di leggere l'input.
 Sento forte odore di strategy pattern... vediamo come implementarlo.
 
-Mi viene spontaneo creare un `inputReader`, un'interfaccia che espone il metodo `Read()` e che verrá implementata dalla struct `FileInputReader` che si occupa di leggere il file e da `PipeInputReader` che si occupa di leggere dallo stdin. Il metodo Read ritorna un array di byte con il contenuto letto e un eventuale errore. Il costruttore esegue la validazione dei flag in ingresso, determina che tipo di input deve leggere e crea l'input reader corretto.
+Mi viene spontaneo creare un `inputReader`, un'interfaccia che espone il metodo `Read()` e che verrá implementata dalla struct `FileInputReader` che si occupa di leggere il file e da `PipeInputReader` che si occupa di leggere dallo stdin. Il metodo Read ritorna un array di byte con il contenuto letto o un errore. Il costruttore esegue la validazione dei flag in ingresso, determina che tipo di input deve leggere e crea l'input reader corretto.
 L' `inputReader` verrá passato poi nella creazione del tool che chiamando semplicemente il metodo Read() dell'implementazione corretta otterrá il contenuto ed eseguirá il conteggio dei contaori e in base ai flag in ingresso restituirá i valori calcolati al main che si preoccuperá di stamparli a video nel modo corretto in base ai flag impostati in ingresso.
 
 Ho quindi introdotto il package reader con l'interfaccia e le relative implementazioni e costruttori e i test che prima testavano il `validateFlag` adesso verificano che i flag restituiti dall'inputReader siano gli stessi.
 
-Un interessante articolo [https://lucapette.me/writing/writing-integration-tests-for-a-go-cli-application/]](https://lucapette.me/writing/writing-integration-tests-for-a-go-cli-application/) sembra rispondere alla mia necessitá di eseguire test di integrazione che permettono di eseguire il binario con i parametri in ingresso e verificare l'output. Ho quindi creato la cartella `integration` con i test per ogni step e mi sono accorto che nel main mi ero perso la gestione del conteggio dei caratteri. Questo mi mette in una situazione di ulteriore sicurezza. 
+Un interessante articolo [https://lucapette.me/writing/writing-integration-tests-for-a-go-cli-application/](https://lucapette.me/writing/writing-integration-tests-for-a-go-cli-application/) sembra rispondere alla mia necessitá di eseguire test di integrazione che permettono di eseguire il binario con i parametri in ingresso e verificare l'output. Ho quindi creato la cartella `integration` con i test per ogni step e mi sono accorto che nel main mi ero perso la gestione del conteggio dei caratteri. Questo mi mette in una situazione di ulteriore sicurezza. 
+
+Ora procedo a implementare lo strategy pattern nel tool.
+
+Quando parliamo di strategy pattern é piú comodo parlare di behaviours dell'applicazione.
+Infatti non solo cambia l'input in caso di file o di pipe ma anche l'output visualizzato... quindi é riduttivo parlare di inputReader ma é piú corretto parlare di _Behaviour_.
+
+Avró un comportamento diverso a seconda che si tratti di pipe o di file da leggere e avró quindi un modo differente di leggere l'input `Read` ma anche di scrivere l'output `Write`.
+Ho creato quindi un package `beahavours` (il nome é troppo generico) con un'interfaccia `WCToolBehaviour` che espone i metodi `ReadInput` e `WriteResult`.
+L'interfaccia viene implementata da `FileInputBehaviour` e `PipeInputBehaviour` nel primo caso in lettura leggerá e restituirá il contenuto del file e scriverá il nome del file mentre nel secondo leggerá quello che arriva nello stdin. La parte di scrittura dei valori dei contatori essendo uguale é stata riportata come funzione nella struct InputFlags `CountersStringResult(counters Counters) string`.

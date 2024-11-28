@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -18,6 +19,24 @@ type CommandWithArgs struct {
 	Args    []string
 }
 
+func TestCliArgsWithError(t *testing.T) {
+	tests := []struct {
+		name     string
+		commands []CommandWithArgs
+		expected string
+	}{
+		{"Wrong input flags", []CommandWithArgs{{Command: path.Join(targetDir, "ccwc.exe"), Args: []string{"-v", "test.txt"}}}, "flag provided but not defined: -v\nUsage of"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			output, err := runBinary(tt.commands)
+			assert.NotNil(t, err)
+			assert.True(t, strings.Contains(string(output), tt.expected))
+		})
+	}
+}
 func TestCliArgs(t *testing.T) {
 	tests := []struct {
 		name     string
