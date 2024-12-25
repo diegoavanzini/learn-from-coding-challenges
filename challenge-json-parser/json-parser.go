@@ -5,7 +5,7 @@ import (
 )
 
 type IParser interface {
-	Parse(input string) (*Parsed, error)
+	Parse(input string) (Parsed, error)
 }
 
 var brackets = map[rune]rune{
@@ -18,7 +18,7 @@ type Parser struct {
 }
 
 // Parse implements IParser.
-func (p *Parser) Parse(input string) (*Parsed, error) {
+func (p *Parser) Parse(input string) (Parsed, error) {
 	var result = NewParsed()
 	closeBracketStack := []rune{}
 	betweenBrackets := ""
@@ -36,7 +36,7 @@ func (p *Parser) Parse(input string) (*Parsed, error) {
 				// bracket closed correctly
 				closeBracketStack = closeBracketStack[:len(closeBracketStack)-1]
 			}
-			result.parseSingleKeyValue(betweenBrackets)
+			result.parseMultipleKeyValues(betweenBrackets)
 		}
 		betweenBrackets = betweenBrackets + string(c)
 	}

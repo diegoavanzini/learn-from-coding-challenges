@@ -2,31 +2,37 @@ package jsonparser
 
 import "strings"
 
-func NewParsed() *Parsed {
-	return &Parsed{
-		values: map[string]interface{}{},
+func NewParsed() Parsed {
+	return Parsed{}
+}
+
+type Parsed map[Key]Value
+
+type Key string
+type Value string
+
+func (p Parsed) Get(key Key) Value {
+	return p[key]
+}
+
+func (p Parsed) Put(key Key, value Value) {
+	p[key] = value
+}
+
+func (result *Parsed) parseMultipleKeyValues(betweenBrackets string) {
+	keyValues := strings.Split(betweenBrackets, ",")
+	for _, keyValue := range keyValues {
+		result.parseSingleKeyValue(keyValue)
 	}
-}
-
-type Parsed struct {
-	values map[string]interface{}
-}
-
-func (p *Parsed) Get(key string) interface{} {
-	return p.values[key]
-}
-
-func (p *Parsed) Put(key string, value interface{}) {
-	p.values[key] = value
 }
 
 func (parsed *Parsed) parseSingleKeyValue(betweenBrackets string) {
 	keyValues := strings.Split(betweenBrackets, ":")
 	if len(keyValues) > 1 {
-		parsed.Put(TrimVal(keyValues[0]), TrimVal(keyValues[1]))
+		parsed.Put(Key(trimVal(keyValues[0])), Value(strings.TrimSpace(keyValues[1])))
 	}
 }
 
-func TrimVal(x string) string {
-	return strings.ReplaceAll(strings.ReplaceAll(x, "\"", ""), " ", "")
+func trimVal(x string) string {
+	return strings.ReplaceAll(strings.TrimSpace(x), "\"", "")
 }
