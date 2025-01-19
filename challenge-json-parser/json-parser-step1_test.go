@@ -8,7 +8,7 @@ import (
 
 func Test_whenJsonIsInvalidShouldReturn1(t *testing.T) {
 	input := "}"
-	p := NewParser()
+	p := NewJsonParser()
 	got, err := p.Parse(input)
 	assert.Nil(t, got)
 	assert.NotNil(t, err)
@@ -16,7 +16,7 @@ func Test_whenJsonIsInvalidShouldReturn1(t *testing.T) {
 
 func Test_whenJsonIsValidShouldReturn0(t *testing.T) {
 	input := "{}"
-	p := NewParser()
+	p := NewJsonParser()
 	got, err := p.Parse(input)
 	if err != nil {
 		t.Fatal(err)

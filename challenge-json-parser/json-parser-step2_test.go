@@ -8,8 +8,8 @@ import (
 
 func Test_whenJsonHasValueShouldReturnAnObject(t *testing.T) {
 	input := `{"key": "value"}`
-	want := Value("\"value\"")
-	p := NewParser()
+	want := Value("value")
+	p := NewJsonParser()
 	parsed, err := p.Parse(input)
 	if err != nil {
 		t.Fatal(err)
@@ -20,8 +20,8 @@ func Test_whenJsonHasValueShouldReturnAnObject(t *testing.T) {
 
 func Test_whenJsonHasValueShouldReturnAnObjectWithValues(t *testing.T) {
 	input := `{"test": "test1"}`
-	want := Value("\"test1\"")
-	p := NewParser()
+	want := Value("test1")
+	p := NewJsonParser()
 	parsed, err := p.Parse(input)
 	if err != nil {
 		t.Fatal(err)
